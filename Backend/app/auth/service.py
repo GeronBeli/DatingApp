@@ -16,6 +16,6 @@ def authenticate_user(username: str, password: str, db: db_dependency):
     user = db.query(Users).filter(Users.username == username).first()
     if not user:
         return False
-    if not bcrypt_context.verify(password + str(user.salt), str(user.password_hash)):
+    if not bcrypt_context.verify(password, str(user.password_hash)):
         return False
     return user

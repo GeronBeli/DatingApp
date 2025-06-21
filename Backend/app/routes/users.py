@@ -26,14 +26,13 @@ async def get_user(id: int, db: db_dependency):
 
 @user_router.post("/")
 async def create_user(user: UserLogin, db: db_dependency):
-    salt = os.urandom(16).hex()
+    #salt = os.urandom(16).hex()
 
-    hashed_password = bcrypt_context.hash(user.password + salt)
+    hashed_password = bcrypt_context.hash(user.password)
 
     new_user = Users(
         username = user.username,
         password_hash = hashed_password,
-        salt = salt
     )
 
     db.add(new_user)

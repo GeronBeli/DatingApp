@@ -1,0 +1,35 @@
+name: Auto Close Issue on Merge to Main
+
+permissions:
+  issues: write
+  pull-requests: read
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  close-issue:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - name: Extract issue number from branch name
+        id: extract
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          echo "Branch name: $BRANCH_NAME"
+
+          ISSUE_NUMBER=$(echo "$BRANCH_NAME" | grep -o '^[0-9]\+')
+          echo "Extracted issue number: $ISSUE_NUMBER"
+
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Close issue
+        if: steps.extract.outputs.issue_number != ''
+        uses: peter-evans/close-issue@v2
+        with:
+          issue-number: ${{ steps.extract.outputs.issue_number }}
+          comment: |
+            Issue closed automatically when branch **${{ github.event.pull_request.head.ref }}** was merged into `main`.
